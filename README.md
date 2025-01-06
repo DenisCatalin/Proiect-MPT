@@ -12,12 +12,12 @@ The frontend is a React application that provides a user interface for:
 ## Key Components
 
 ### State Management
-const [speakers, setSpeakers] = useState([]); // Stores list of registered speakers
-const [selectedFile, setSelectedFile] = useState(null); // Currently selected audio file
-const [result, setResult] = useState(null); // Speaker identification results
-const [newSpeakerId, setNewSpeakerId] = useState(''); // ID for new speaker registration
-const [newSpeakerName, setNewSpeakerName] = useState(''); // Name for new speaker
-const [waveform, setWaveform] = useState(null); // Audio waveform visualization
+`const [speakers, setSpeakers] = useState([]); // Stores list of registered speakers`
+`const [selectedFile, setSelectedFile] = useState(null); // Currently selected audio file`
+`const [result, setResult] = useState(null); // Speaker identification results`
+`const [newSpeakerId, setNewSpeakerId] = useState(''); // ID for new speaker registration`
+`const [newSpeakerName, setNewSpeakerName] = useState(''); // Name for new speaker`
+`const [waveform, setWaveform] = useState(null); // Audio waveform visualization`
 
 ### Main Functions
 
@@ -192,7 +192,7 @@ Frontend:
 npm start`
 
 File Structure
-project/
+`project/
 ├── backend/
 │ ├── app/
 │ │ ├── api/
@@ -205,4 +205,4 @@ project/
 └── frontend/
 ├── src/
 │ └── App.js
-└── package.json
+└── package.json`
