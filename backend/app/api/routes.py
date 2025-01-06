@@ -6,7 +6,6 @@ import os
 
 app = FastAPI()
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -15,7 +14,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize Speaker handler
 speaker_handler = SpeakerHandler(dataset_path="C:/Users/Denis/Desktop/LibriSpeech/dev-clean")
 
 @app.get("/speakers")

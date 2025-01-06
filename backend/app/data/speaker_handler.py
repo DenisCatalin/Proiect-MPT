@@ -9,12 +9,11 @@ from scipy.stats import norm
 class SpeakerHandler:
     def __init__(self, dataset_path):
         self.dataset_path = dataset_path
-        self.registered_path = "registered_speakers"  # Directory for registered speakers
+        self.registered_path = "registered_speakers"
         self.speaker_features = defaultdict(list)
         self.speaker_names = {}
         self.storage_file = "speakers_database.json"
         
-        # Create registered speakers directory if it doesn't exist
         os.makedirs(self.registered_path, exist_ok=True)
         
         self.load_speakers()
@@ -32,7 +31,7 @@ class SpeakerHandler:
         }
         
         with open(self.storage_file, 'w') as f:
-            json.dump(data, f, indent=2)  # Added indent for readability
+            json.dump(data, f, indent=2) 
 
     def get_speaker_files(self, speaker_id):
         """Get list of audio files for a speaker"""
@@ -43,16 +42,13 @@ class SpeakerHandler:
 
     def add_speaker_sample(self, speaker_id, audio_path, original_filename):
         """Add a new audio sample for a speaker"""
-        # Create speaker directory if it doesn't exist
         speaker_dir = os.path.join(self.registered_path, speaker_id)
         os.makedirs(speaker_dir, exist_ok=True)
         
-        # Copy audio file to speaker directory
         new_filename = f"{len(self.get_speaker_files(speaker_id)) + 1}_{original_filename}"
         new_path = os.path.join(speaker_dir, new_filename)
         shutil.copy2(audio_path, new_path)
         
-        # Extract and save features
         features = self.extract_features(new_path)
         if features is not None:
             self.speaker_features[speaker_id].append(features)
@@ -85,7 +81,6 @@ class SpeakerHandler:
                 data = json.load(f)
                 
             for speaker_id, speaker_data in data.items():
-                # Convert lists back to numpy arrays
                 features = [np.array(feature_list) for feature_list in speaker_data['features']]
                 self.speaker_features[speaker_id].extend(features)
                 self.speaker_names[speaker_id] = speaker_data['name']
@@ -93,27 +88,20 @@ class SpeakerHandler:
 
     def extract_features(self, audio_path):
         try:
-            # Load audio file with a longer duration
-            y, sr = librosa.load(audio_path, duration=5)  # Increased duration
+            y, sr = librosa.load(audio_path, duration=5)
             
-            # Extract multiple types of features
-            # 1. MFCCs with delta and delta-delta
-            mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)  # Increased number of coefficients
+            mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)
             delta_mfcc = librosa.feature.delta(mfcc)
             delta2_mfcc = librosa.feature.delta(mfcc, order=2)
             
-            # 2. Mel spectrogram with different window sizes
             mel_spect = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128)
             mel_spect_db = librosa.power_to_db(mel_spect, ref=np.max)
             
-            # 3. Spectral features
             spectral_centroids = librosa.feature.spectral_centroid(y=y, sr=sr)
             spectral_rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)
             
-            # 4. Zero crossing rate
             zcr = librosa.feature.zero_crossing_rate(y)
             
-            # Combine all features
             features = np.concatenate([
                 np.mean(mfcc, axis=1),
                 np.std(mfcc, axis=1),
@@ -126,7 +114,6 @@ class SpeakerHandler:
                 np.mean(zcr, axis=1)
             ])
             
-            # Normalize features
             features = (features - np.mean(features)) / np.std(features)
             
             return features
@@ -137,13 +124,10 @@ class SpeakerHandler:
 
     def calculate_similarity(self, features1, features2):
         """Calculate similarity between two feature sets using multiple metrics"""
-        # Euclidean distance
         euclidean_dist = np.linalg.norm(features1 - features2)
         
-        # Cosine similarity
         cosine_sim = np.dot(features1, features2) / (np.linalg.norm(features1) * np.linalg.norm(features2))
         
-        # Combine metrics (weighted average)
         similarity = 0.7 * (1 / (1 + euclidean_dist)) + 0.3 * ((cosine_sim + 1) / 2)
         
         return similarity
@@ -157,17 +141,14 @@ class SpeakerHandler:
         best_score = -float('inf')
         scores = []
 
-        # Calculate similarities with all speakers
         for speaker_id in self.speaker_features:
             speaker_samples = self.speaker_features[speaker_id]
             sample_scores = []
             
-            # Compare with each sample from the speaker
             for sample_features in speaker_samples:
                 similarity = self.calculate_similarity(test_features, sample_features)
                 sample_scores.append(similarity)
             
-            # Use the average of top 3 similarities (or all if less than 3)
             top_scores = sorted(sample_scores, reverse=True)[:3]
             avg_score = np.mean(top_scores)
             scores.append(avg_score)
@@ -176,14 +157,12 @@ class SpeakerHandler:
                 best_score = avg_score
                 best_match = speaker_id
 
-        # Calculate confidence using statistical normalization
         if scores:
             mean_score = np.mean(scores)
             std_score = np.std(scores) if len(scores) > 1 else 0.1
             confidence = norm.cdf((best_score - mean_score) / (std_score + 1e-6))
-            # Scale confidence to be more discriminative
-            confidence = (confidence - 0.5) * 2  # Scale from [0.5, 1] to [0, 1]
-            confidence = max(0, min(1, confidence))  # Clip to [0, 1]
+            confidence = (confidence - 0.5) * 2
+            confidence = max(0, min(1, confidence))
         else:
             confidence = 0.0
 
@@ -202,33 +181,27 @@ class SpeakerHandler:
         for speaker_id in os.listdir(self.dataset_path):
             speaker_path = os.path.join(self.dataset_path, speaker_id)
             if os.path.isdir(speaker_path):
-                # Get all chapter directories
                 for chapter_dir in os.listdir(speaker_path):
                     chapter_path = os.path.join(speaker_path, chapter_dir)
                     if os.path.isdir(chapter_path):
-                        # Get first 3 audio files from each chapter
                         audio_files = [f for f in os.listdir(chapter_path) if f.endswith('.flac')][:3]
                         for audio_file in audio_files:
                             audio_path = os.path.join(chapter_path, audio_file)
-                            # Pass the original filename as well
                             self.add_speaker_sample(speaker_id, audio_path, audio_file)
                 print(f"Loaded speaker: {speaker_id}") 
 
     def delete_speaker(self, speaker_id):
         """Delete a speaker and all their data"""
         try:
-            # Remove from features and names
             if speaker_id in self.speaker_features:
                 del self.speaker_features[speaker_id]
             if speaker_id in self.speaker_names:
                 del self.speaker_names[speaker_id]
             
-            # Remove speaker directory
             speaker_dir = os.path.join(self.registered_path, speaker_id)
             if os.path.exists(speaker_dir):
                 shutil.rmtree(speaker_dir)
             
-            # Save changes
             self.save_speakers()
             return True
         except Exception as e:
@@ -253,6 +226,6 @@ class SpeakerHandler:
             return None, 0.0
         
         similarity = self.calculate_similarity(features1, features2)
-        is_same_speaker = similarity > 0.7  # Threshold for same speaker
+        is_same_speaker = similarity > 0.7
         
         return is_same_speaker, similarity 
