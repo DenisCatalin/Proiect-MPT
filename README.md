@@ -12,12 +12,12 @@ The frontend is a React application that provides a user interface for:
 ## Key Components
 
 ### State Management
-`const [speakers, setSpeakers] = useState([]); // Stores list of registered speakers`
-`const [selectedFile, setSelectedFile] = useState(null); // Currently selected audio file`
-`const [result, setResult] = useState(null); // Speaker identification results`
-`const [newSpeakerId, setNewSpeakerId] = useState(''); // ID for new speaker registration`
-`const [newSpeakerName, setNewSpeakerName] = useState(''); // Name for new speaker`
-`const [waveform, setWaveform] = useState(null); // Audio waveform visualization`
+- `const [speakers, setSpeakers] = useState([]);` // Stores list of registered speakers
+- `const [selectedFile, setSelectedFile] = useState(null);` // Currently selected audio file
+- `const [result, setResult] = useState(null);` // Speaker identification results
+- `const [newSpeakerId, setNewSpeakerId] = useState('');` // ID for new speaker registration
+- `const [newSpeakerName, setNewSpeakerName] = useState('');` // Name for new speaker
+- `const [waveform, setWaveform] = useState(null);` // Audio waveform visualization
 
 ### Main Functions
 
@@ -192,17 +192,30 @@ Frontend:
 npm start`
 
 File Structure
-`project/
+```bash
+speaker-recognition-system/
 ├── backend/
-│ ├── app/
-│ │ ├── api/
-│ │ │ └── routes.py
-│ │ ├── data/
-│ │ │ └── speaker_handler.py
-│ │ └── utils/
-│ │ └── audio_processor.py
-│ └── requirements.txt
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   └── routes.py          # FastAPI endpoints
+│   │   ├── data/
+│   │   │   ├── __init__.py
+│   │   │   └── speaker_handler.py # Core speaker recognition logic
+│   │   └── utils/
+│   │       ├── __init__.py
+│   │       └── audio_processor.py # Audio processing utilities
+│   ├── requirements.txt           # Python dependencies
+│   └── README.md                  # Backend documentation
+│
 └── frontend/
-├── src/
-│ └── App.js
-└── package.json`
+    ├── public/
+    │   ├── index.html
+    │   └── favicon.ico
+    ├── src/
+    │   ├── App.js                 # Main React component
+    │   ├── index.js              
+    │   └── styles.css
+    ├── package.json              # Node.js dependencies
+    └── README.md                 # Frontend documentation
+```
